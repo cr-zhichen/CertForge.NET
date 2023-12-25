@@ -17,9 +17,9 @@ public class AppDbContext : DbContext
     }
 
     /// <summary>
-    /// UserInfo 表
+    /// CertificateRepositories 表
     /// </summary>
-    public DbSet<UserInfo> TestUser { get; set; }
+    public DbSet<Certificate> Certificate { get; set; }
 
     /// <summary>
     /// 数据库配置
@@ -35,14 +35,14 @@ public class AppDbContext : DbContext
     /// <param name="modelBuilder"></param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 配置 UserInfo 表的映射
+        // 配置 CertificateRepositories 表的映射
         modelBuilder
-            .Entity<UserInfo>(entity =>
+            .Entity<Certificate>(entity =>
             {
-                entity.HasKey(e => e.UserId).HasName("PRIMARY");
-                entity.Property(e => e.UserId).ValueGeneratedOnAdd();
-                entity.HasIndex(u => u.Username).IsUnique();
-                entity.Property(e => e.Role).HasConversion<string>();
+                entity.HasKey(e => e.CertificateId).HasName("PRIMARY");
+                entity.Property(e => e.CertificateId).ValueGeneratedOnAdd();
+                entity.HasIndex(u => u.Cn).IsUnique();
+                entity.Property(e => e.Type).HasConversion<string>();
             });
     }
 }
