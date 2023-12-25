@@ -131,7 +131,7 @@ builder.Services.AddSwaggerGen(c =>
         Title = "CertForge.NET",
         Version = "v1",
         Description = @"
-基于.NET6.0 的的快速开发框架
+使用.NET 开发的简易自签发证书工具
 <br/>
 <a href='/'>前端页面</a>
 <a href='https://github.com/cr-zhichen/CertForge.NET'>项目地址</a>

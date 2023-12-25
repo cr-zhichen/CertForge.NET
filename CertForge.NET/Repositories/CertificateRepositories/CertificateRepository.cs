@@ -1,8 +1,6 @@
 ﻿using CertForge.NET.Data;
-using CertForge.NET.Enum;
 using CertForge.NET.Infrastructure;
 using CertForge.NET.Models;
-using CertForge.NET.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CertForge.NET.Repositories.CertificateRepositories;
@@ -30,20 +28,7 @@ public class CertificateRepository : ICertificateRepository, IMarker
     public async Task<bool> IsRootCertificateExistAsync()
     {
         // 如果数据库中无数据，则返回false
-        if (!await _context.Certificate.AnyAsync())
-        {
-            return false;
-        }
-
-        // 如果数据库中有数据，则判断第一条数据的类型是否为根证书
-        var firstCertificate = await _context.Certificate.FirstAsync();
-        if (firstCertificate.Type == CertificateType.Root)
-        {
-            return true;
-        }
-
-        // 如果数据库中有数据，但第一条数据的类型不是根证书，则全局搜索数据库中的根证书
-        return await _context.Certificate.AnyAsync(certificate => certificate.Type == CertificateType.Root);
+        return await _context.Certificate.AnyAsync();
     }
 
     /// <summary>
@@ -52,30 +37,9 @@ public class CertificateRepository : ICertificateRepository, IMarker
     /// <returns></returns>
     public async Task<Certificate> GetRootCertificateAsync()
     {
-        // 如果数据库中无数据，则抛出异常
-        if (!await _context.Certificate.AnyAsync())
-        {
-            throw new Exception("数据库中无证书");
-        }
-
-        // 如果数据库中有数据，则判断第一条数据的类型是否为根证书
-        var firstCertificate = await _context.Certificate.FirstAsync();
-        if (firstCertificate.Type == CertificateType.Root)
-        {
-            return firstCertificate;
-        }
-
-        // 如果数据库中有数据，但第一条数据的类型不是根证书，则全局搜索数据库中的根证书
-        var rootCertificate =
-            await _context.Certificate.FirstOrDefaultAsync(certificate => certificate.Type == CertificateType.Root);
-        if (rootCertificate == null)
-        {
-            throw new Exception("数据库中无根证书");
-        }
-        else
-        {
-            return rootCertificate;
-        }
+        // 返回第一条数据
+        var rootCertificate = await _context.Certificate.FirstAsync();
+        return rootCertificate;
     }
 
     /// <summary>
@@ -84,17 +48,14 @@ public class CertificateRepository : ICertificateRepository, IMarker
     /// <param name="cn"></param>
     /// <param name="certificatePem"></param>
     /// <param name="privateKey"></param>
-    /// <param name="type"></param>
     /// <returns></returns>
-    public async Task<Certificate> CreateCertificateAsync(string cn, string certificatePem, string privateKey,
-        CertificateType type)
+    public async Task<Certificate> CreateCertificateAsync(string cn, string certificatePem, string privateKey)
     {
         var certificate = new Certificate()
         {
             Cn = cn,
             CertificatePem = certificatePem,
             PrivateKey = privateKey,
-            Type = type
         };
 
         await _context.Certificate.AddAsync(certificate);

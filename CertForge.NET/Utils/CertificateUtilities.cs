@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -23,9 +24,10 @@ public static class CertificateUtilities
     /// <param name="organization"></param>
     /// <param name="commonName"></param>
     /// <param name="country"></param>
+    /// <param name="year"></param>
     /// <returns></returns>
     public static (string certificate, string privateKey) CreateRootCertificate(string country, string organization,
-        string commonName)
+        string commonName, int year = 100)
     {
         var random = new SecureRandom();
         var certificateGenerator = new X509V3CertificateGenerator();
@@ -40,7 +42,7 @@ public static class CertificateUtilities
         certificateGenerator.SetSubjectDN(subjectDn);
 
         certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
-        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
+        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(year));
 
         var keyGenerationParameters = new KeyGenerationParameters(random, 2048);
         var keyPairGenerator = new RsaKeyPairGenerator();
@@ -72,12 +74,15 @@ public static class CertificateUtilities
     /// </summary>
     /// <param name="organization"></param>
     /// <param name="commonName"></param>
+    /// <param name="subjectAlternativeName"></param>
     /// <param name="issuerCertificatePem"></param>
     /// <param name="issuerPrivateKeyPem"></param>
     /// <param name="country"></param>
+    /// <param name="year"></param>
     /// <returns></returns>
     public static (string certificate, string privateKey) CreateSignedCertificate(string country, string organization,
-        string commonName, string issuerCertificatePem, string issuerPrivateKeyPem)
+        string commonName, string subjectAlternativeName, string issuerCertificatePem, string issuerPrivateKeyPem,
+        int year = 100)
     {
         var reader = new StringReader(issuerCertificatePem);
         var pemReader = new PemReader(reader);
@@ -99,7 +104,7 @@ public static class CertificateUtilities
         certificateGenerator.SetSubjectDN(subjectDn);
 
         certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
-        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
+        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(year));
 
         var keyGenerationParameters = new KeyGenerationParameters(random, 2048);
         var keyPairGenerator = new RsaKeyPairGenerator();
@@ -107,6 +112,16 @@ public static class CertificateUtilities
 
         var keyPair = keyPairGenerator.GenerateKeyPair();
         certificateGenerator.SetPublicKey(keyPair.Public);
+
+        // 添加 SAN
+        var sanValues = subjectAlternativeName.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        var sanVector = new Asn1EncodableVector();
+        foreach (var name in sanValues)
+        {
+            sanVector.Add(new GeneralName(GeneralName.DnsName, name.Trim()));
+        }
+
+        certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName.Id, false, new DerSequence(sanVector));
 
         var signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", issuerPrivateKey.Private);
         var certificate = certificateGenerator.Generate(signatureFactory);

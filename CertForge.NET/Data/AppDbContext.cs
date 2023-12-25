@@ -41,8 +41,7 @@ public class AppDbContext : DbContext
             {
                 entity.HasKey(e => e.CertificateId).HasName("PRIMARY");
                 entity.Property(e => e.CertificateId).ValueGeneratedOnAdd();
-                entity.HasIndex(u => u.Cn).IsUnique();
-                entity.Property(e => e.Type).HasConversion<string>();
+                entity.Property(e => e.Cn).IsRequired();
             });
     }
 }

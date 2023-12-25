@@ -1,10 +1,7 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using CertForge.NET.DTOs;
+﻿using CertForge.NET.DTOs;
 using CertForge.NET.DTOs.HTTP.Requests;
 using CertForge.NET.DTOs.HTTP.Responses;
-using CertForge.NET.Enum;
 using CertForge.NET.Infrastructure;
-using CertForge.NET.Jwt;
 using CertForge.NET.Repositories.CertificateRepositories;
 using CertForge.NET.Utils;
 
@@ -67,7 +64,7 @@ public class CertificateServices : ICertificateServices, IMarker
             var rootCertificate = CertificateUtilities.CreateRootCertificate(c, o, cn);
             // 将根证书保存到数据库
             await _certificateRepository.CreateCertificateAsync(cn, rootCertificate.certificate,
-                rootCertificate.privateKey, CertificateType.Root);
+                rootCertificate.privateKey);
             // 返回根证书
             return new Ok<GetRootCertificateResponse>()
             {
@@ -90,6 +87,7 @@ public class CertificateServices : ICertificateServices, IMarker
         var c = request.C ?? (_configuration["RootCertificate:C"] ?? "CN");
         var o = request.O ?? (_configuration["RootCertificate:O"] ?? "CertForgeDotNET");
         var cn = request.Cn;
+        var san = request.San ?? "";
 
         // 判断是否已经存在根证书
         var exists = await _certificateRepository.IsRootCertificateExistAsync();
@@ -100,24 +98,21 @@ public class CertificateServices : ICertificateServices, IMarker
             var rootC = _configuration["RootCertificate:C"] ?? "CN";
             var rootO = _configuration["RootCertificate:O"] ?? "CertForgeDotNET";
             var rootCn = _configuration["RootCertificate:CN"] ?? "CertForgeDotNET";
-            
+
             // 不存在，则生成根证书
             var rootCertificate =
                 CertificateUtilities.CreateRootCertificate(rootC, rootO, rootCn);
             // 将根证书保存到数据库
             await _certificateRepository.CreateCertificateAsync(rootCn, rootCertificate.certificate,
-                rootCertificate.privateKey, CertificateType.Root);
+                rootCertificate.privateKey);
         }
 
         // 从数据库中获取根证书
         var rootCertificateFromDb = await _certificateRepository.GetRootCertificateAsync();
 
         // 创建签名证书
-        var signedCertificate = CertificateUtilities.CreateSignedCertificate(c, o, cn,
-            rootCertificateFromDb.CertificatePem, rootCertificateFromDb.PrivateKey);
-        // 将签名证书保存到数据库
-        await _certificateRepository.CreateCertificateAsync(request.Cn, signedCertificate.certificate,
-            signedCertificate.privateKey, CertificateType.Issued);
+        var signedCertificate = CertificateUtilities.CreateSignedCertificate(c, o, cn, san,
+            rootCertificateFromDb.CertificatePem, rootCertificateFromDb.PrivateKey, request.ValidityYear);
         // 返回签名证书
         return new Ok<GenerateCertificateResponse>()
         {

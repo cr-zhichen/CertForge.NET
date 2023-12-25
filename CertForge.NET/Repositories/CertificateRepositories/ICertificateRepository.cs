@@ -1,5 +1,4 @@
-﻿using CertForge.NET.Enum;
-using CertForge.NET.Models;
+﻿using CertForge.NET.Models;
 
 namespace CertForge.NET.Repositories.CertificateRepositories;
 
@@ -26,7 +25,6 @@ public interface ICertificateRepository
     /// <param name="cn"></param>
     /// <param name="certificatePem"></param>
     /// <param name="privateKey"></param>
-    /// <param name="type"></param>
     /// <returns></returns>
-    Task<Certificate> CreateCertificateAsync(string cn, string certificatePem, string privateKey, CertificateType type);
+    Task<Certificate> CreateCertificateAsync(string cn, string certificatePem, string privateKey);
 }

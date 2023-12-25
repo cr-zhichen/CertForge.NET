@@ -5,7 +5,7 @@ export default {
         auto: 'auto theme',
     },
     homePage: {
-        title: 'Home Page',
+        title: 'Simple SSL Certificate Generator',
         notFoundButton: '404 Page',
         swatchThemeButton: 'Swatch Theme',
     },

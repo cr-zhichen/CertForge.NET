@@ -5,7 +5,7 @@ export default {
         auto: '自动主题',
     },
     homePage: {
-        title: '主页',
+        title: '简易SSL证书生成器',
         notFoundButton: '404页面',
         swatchThemeButton: '切换主题',
     },

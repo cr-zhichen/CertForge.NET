@@ -44,12 +44,4 @@ public class Certificate
     [MaxLength(4096)]
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public string PrivateKey { get; set; } = null!;
-
-    /// <summary>
-    /// 证书类型
-    /// </summary>
-    [Required]
-    [Column("type")]
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    public CertificateType Type { get; set; }
 }

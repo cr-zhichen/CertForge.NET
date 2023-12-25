@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CertForge.NET.Controllers;
 
 /// <summary>
-/// 用户控制器
+/// 证书相关的控制器
 /// </summary>
 [ApiController]
 [Route("api/certificate")]
