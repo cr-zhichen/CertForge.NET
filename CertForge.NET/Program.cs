@@ -6,7 +6,6 @@ using CertForge.NET.Infrastructure;
 using CertForge.NET.Jwt;
 using CertForge.NET.Middleware;
 using CertForge.NET.Utils;
-using CertForge.NET.WS;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -171,7 +170,6 @@ builder.Services.AddSwaggerGen(c =>
 #region 依赖注入
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddTransient<WebSocketController>();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -261,37 +259,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
-#endregion
-
-#region WebSocket配置
-
-var webSocketOptions = new WebSocketOptions
-{
-    KeepAliveInterval = TimeSpan.FromMinutes(2)
-};
-
-app.UseWebSockets(webSocketOptions);
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/ws")
-    {
-        if (context.WebSockets.IsWebSocketRequest)
-        {
-            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-            var webSocketController = context.RequestServices.GetService<WebSocketController>();
-            await webSocketController?.HandleWebSocketAsync(context, webSocket)!;
-        }
-        else
-        {
-            context.Response.StatusCode = 400;
-        }
-    }
-    else
-    {
-        await next();
-    }
-});
 
 #endregion
 
