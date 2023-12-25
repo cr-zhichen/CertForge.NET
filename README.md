@@ -8,6 +8,20 @@
 2. 运行 `dotnet restore`
 3. 启动项目：`dotnet run`
 
+## Docker 部署
+
+```bash
+docker run -d \
+  -p 9000:9000 \
+  --name certforge_dotnet \
+  -e RootCertificate__C=CN \
+  -e RootCertificate__O=CertForge.NET \
+  -e RootCertificate__CN=CertForge.NET \
+  -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
+  -v /path/to/certforge_dotnet/db:/app/db \
+  ghcr.io/cr-zhichen/certforge.net:latest
+```
+
 ## Dockerfile 部署
 
 ### 构建 Docker 镜像
@@ -32,8 +46,10 @@ docker build --network="host" \
 docker run -d \
   -p 9000:9000 \
   --name certforge_dotnet \
-  -e TokenOptions__SecretKey=Your_New_Secret_Key \
-  -e TokenOptions__Issuer=Your_New_Issuer \
-  -e TokenOptions__Audience=Your_New_Audience \
+  -e RootCertificate__C=CN \
+  -e RootCertificate__O=CertForge.NET \
+  -e RootCertificate__CN=CertForge.NET \
+  -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
+  -v /path/to/certforge_dotnet/db:/app/db \
   certforge_dotnet:latest
 ```
