@@ -18,8 +18,12 @@ docker run -d \
   -e RootCertificate__O=CertForge.NET \
   -e RootCertificate__CN=CertForge.NET \
   -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
-  -v /path/to/certforge_dotnet/db:/app/db \
   ghcr.io/cr-zhichen/certforge.net:latest
+```
+
+如需持久化`根证书`数据，可挂载 `/app/db` 目录。
+```bash
+  -v /path/to/certforge_dotnet/db:/app/db \
 ```
 
 ## Dockerfile 部署
@@ -50,6 +54,10 @@ docker run -d \
   -e RootCertificate__O=CertForge.NET \
   -e RootCertificate__CN=CertForge.NET \
   -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
-  -v /path/to/certforge_dotnet/db:/app/db \
   certforge_dotnet:latest
+```
+
+如需持久化`根证书`数据，可挂载 `/app/db` 目录。
+```bash
+  -v /path/to/certforge_dotnet/db:/app/db \
 ```
