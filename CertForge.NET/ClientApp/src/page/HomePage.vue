@@ -6,11 +6,11 @@ import {ElMessage} from "element-plus";
 
 const theme = ref(getThemeIcon());
 const formModel = ref({
-    c: '',
-    o: '',
+    c: 'CN',
+    o: 'CertForgeDotNET',
     cn: '',
     san: '',
-    validityYear: null
+    validityYear: 100
 });
 const publicKey = ref('');
 const privateKey = ref('');
@@ -50,24 +50,22 @@ const generateCertificate = () => {
     formRef.value.validate((valid) => {
         if (valid) {
             // 处理证书生成逻辑
-            console.log('表单验证通过');
+            GenerateCertificate({
+                c: formModel.value.c,
+                o: formModel.value.o,
+                cn: formModel.value.cn,
+                san: formModel.value.san,
+                validityYear: formModel.value.validityYear
+            }, (data) => {
+                publicKey.value = data.data.publicKey;
+                privateKey.value = data.data.privateKey;
+            }, (err) => {
+                ElMessage.error(err);
+            });
         } else {
-            console.error('表单验证失败');
+            ElMessage.error('请检查所有必填项');
             return false;
         }
-    });
-
-    GenerateCertificate({
-        c: formModel.value.c,
-        o: formModel.value.o,
-        cn: formModel.value.cn,
-        san: formModel.value.san,
-        validityYear: formModel.value.validityYear
-    }, (data) => {
-        publicKey.value = data.data.publicKey;
-        privateKey.value = data.data.privateKey;
-    }, (err) => {
-        ElMessage.error(err);
     });
 }
 
@@ -125,7 +123,7 @@ const downloadPrivateKey = () => {
             <el-form-item label="CN (通用名称)" prop="cn">
                 <el-input v-model="formModel.cn" placeholder="127.0.0.1"></el-input>
             </el-form-item>
-            <el-form-item label="SAN (主机名,多主机名使用逗号分隔)">
+            <el-form-item label="SAN (主机名,多主机名使用逗号分隔,为空则使用CN作为SAN)">
                 <el-input v-model="formModel.san" placeholder="192.168.1.1,192.168.1.2"></el-input>
             </el-form-item>
             <el-form-item label="有效时间 (年)" prop="validityYear">
