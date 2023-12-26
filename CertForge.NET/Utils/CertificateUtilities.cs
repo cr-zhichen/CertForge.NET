@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -35,7 +36,7 @@ public static class CertificateUtilities
         var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(long.MaxValue), random);
         certificateGenerator.SetSerialNumber(serialNumber);
 
-        var dirName = $"C={commonName}, O={commonName}, CN={commonName}";
+        var dirName = $"C={country}, O={organization}, CN={commonName}";
         var issuerDn = new X509Name(dirName);
         var subjectDn = issuerDn;
         certificateGenerator.SetIssuerDN(issuerDn);
@@ -43,6 +44,13 @@ public static class CertificateUtilities
 
         certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
         certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(year));
+        
+        // 添加基本限制扩展 - 表明这是一个CA证书
+        certificateGenerator.AddExtension(X509Extensions.BasicConstraints.Id, true, new BasicConstraints(true));
+
+        // 可以选择性地添加密钥用途扩展
+        KeyUsage keyUsage = new KeyUsage(KeyUsage.KeyCertSign | KeyUsage.CrlSign);
+        certificateGenerator.AddExtension(X509Extensions.KeyUsage.Id, false, keyUsage);
 
         var keyGenerationParameters = new KeyGenerationParameters(random, 2048);
         var keyPairGenerator = new RsaKeyPairGenerator();
@@ -118,7 +126,9 @@ public static class CertificateUtilities
         var sanVector = new Asn1EncodableVector();
         foreach (var name in sanValues)
         {
-            sanVector.Add(new GeneralName(GeneralName.DnsName, name.Trim()));
+            sanVector.Add(IPAddress.TryParse(name.Trim(), out _)
+                ? new GeneralName(GeneralName.IPAddress, name.Trim())
+                : new GeneralName(GeneralName.DnsName, name.Trim()));
         }
 
         certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName.Id, false, new DerSequence(sanVector));

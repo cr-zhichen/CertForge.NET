@@ -84,10 +84,10 @@ public class CertificateServices : ICertificateServices, IMarker
     /// <returns></returns>
     public async Task<IRe<GenerateCertificateResponse>> GenerateCertificateAsync(GenerateCertificateRequest request)
     {
-        var c = request.C ?? (_configuration["RootCertificate:C"] ?? "CN");
-        var o = request.O ?? (_configuration["RootCertificate:O"] ?? "CertForgeDotNET");
-        var cn = request.Cn;
-        var san = request.San ?? "";
+        var c = (string.IsNullOrEmpty(request.C) ? _configuration["RootCertificate:C"] ?? "CN" : request.C)!;
+        var o = (string.IsNullOrEmpty(request.O) ? _configuration["RootCertificate:O"] ?? "CertForgeDotNET" : request.O)!;
+        var cn = string.IsNullOrEmpty(request.Cn) ? _configuration["RootCertificate:CN"] ?? "CertForgeDotNET" : request.Cn;
+        var san = (string.IsNullOrEmpty(request.San) ? cn : request.San)!;
 
         // 判断是否已经存在根证书
         var exists = await _certificateRepository.IsRootCertificateExistAsync();
