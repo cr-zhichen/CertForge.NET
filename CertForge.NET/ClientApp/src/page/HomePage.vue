@@ -189,7 +189,7 @@ const downloadPrivateKey = () => {
 
         <el-dialog
             v-model="dialogTableVisible"
-            title="Shipping address"
+            title="请输入密码"
             width="800px">
 
             <!-- 密码输入框 -->
