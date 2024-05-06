@@ -25,6 +25,9 @@ const rules = {
     ]
 };
 
+const dialogTableVisible = ref(false);
+const password = ref('');
+
 //下载根证书
 const downloadRoot = () => {
     GetRootCertificate((data) => {
@@ -47,25 +50,25 @@ const downloadRoot = () => {
 
 // 生成证书，包括C，O，CN，validityYear。
 const generateCertificate = () => {
-    formRef.value.validate((valid) => {
-        if (valid) {
-            // 处理证书生成逻辑
-            GenerateCertificate({
-                c: formModel.value.c,
-                o: formModel.value.o,
-                cn: formModel.value.cn,
-                san: formModel.value.san,
-                validityYear: formModel.value.validityYear
-            }, (data) => {
-                publicKey.value = data.data.publicKey;
-                privateKey.value = data.data.privateKey;
-            }, (err) => {
-                ElMessage.error(err);
-            });
-        } else {
-            ElMessage.error('请检查所有必填项');
-            return false;
-        }
+    // 弹窗要求输入密码
+    dialogTableVisible.value = true;
+}
+
+// 发送证书请求
+const sendCertificateRequest = () => {
+    // 发送证书请求
+    GenerateCertificate({
+        c: formModel.value.c,
+        o: formModel.value.o,
+        cn: formModel.value.cn,
+        san: formModel.value.san,
+        validityYear: formModel.value.validityYear,
+        password: password.value
+    }, (data) => {
+        publicKey.value = data.data.publicKey;
+        privateKey.value = data.data.privateKey;
+    }, (err) => {
+        ElMessage.error(err);
     });
 }
 
@@ -183,6 +186,29 @@ const downloadPrivateKey = () => {
         >
             下载根证书
         </el-button>
+
+        <el-dialog
+            v-model="dialogTableVisible"
+            title="Shipping address"
+            width="800px">
+
+            <!-- 密码输入框 -->
+            <el-input
+                v-model="password"
+                placeholder="请输入密码"
+                type="password"
+                show-password>
+            </el-input>
+
+            <!-- 底部操作按钮 -->
+            <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="dialogTableVisible = false">取消</el-button>
+                <el-button type="primary" @click="sendCertificateRequest">确定</el-button>
+            </span>
+            </template>
+        </el-dialog>
+
 
     </div>
 </template>

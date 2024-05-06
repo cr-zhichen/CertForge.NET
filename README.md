@@ -18,6 +18,7 @@ docker run -d \
   -e RootCertificate__O=CertForge.NET \
   -e RootCertificate__CN=CertForge.NET \
   -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
+  -e UserInfo__Password="qwertyuiop" \
   ghcr.io/cr-zhichen/certforge.net:latest
 ```
 
@@ -54,6 +55,7 @@ docker run -d \
   -e RootCertificate__O=CertForge.NET \
   -e RootCertificate__CN=CertForge.NET \
   -e ConnectionStrings__SqliteConnection="Data Source=/app/db/App.db" \
+  -e UserInfo__Password="qwertyuiop" \
   certforge_dotnet:latest
 ```
 

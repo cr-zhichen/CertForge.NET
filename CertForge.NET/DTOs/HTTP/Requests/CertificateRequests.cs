@@ -29,4 +29,9 @@ public class GenerateCertificateRequest
     /// 证书有效期(年)
     /// </summary>
     public int ValidityYear { get; set; } = 100;
+    
+    /// <summary>
+    /// 密码
+    /// </summary>
+    public string Password { get; set; } = null!;
 }

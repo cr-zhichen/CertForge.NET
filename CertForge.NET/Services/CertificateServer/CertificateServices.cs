@@ -84,6 +84,18 @@ public class CertificateServices : ICertificateServices, IMarker
     /// <returns></returns>
     public async Task<IRe<GenerateCertificateResponse>> GenerateCertificateAsync(GenerateCertificateRequest request)
     {
+        var correctPassword = _configuration["UserInfo:Password"];
+        
+        // 判断密码是否正确
+        if (request.Password != correctPassword)
+        {
+            return new Error<GenerateCertificateResponse>()
+            {
+                Message = "密码错误",
+                Data = null
+            };
+        }
+
         var c = (string.IsNullOrEmpty(request.C) ? _configuration["RootCertificate:C"] ?? "CN" : request.C)!;
         var o = (string.IsNullOrEmpty(request.O) ? _configuration["RootCertificate:O"] ?? "CertForgeDotNET" : request.O)!;
         var cn = string.IsNullOrEmpty(request.Cn) ? _configuration["RootCertificate:CN"] ?? "CertForgeDotNET" : request.Cn;
